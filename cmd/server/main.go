@@ -21,6 +21,7 @@ func main() {
 		panic(err)
 	}
 
+	// Set up the logger
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	if cfg.IsDevEnv() {
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
@@ -51,6 +52,7 @@ func main() {
 	}
 	kratosClient := kratos.NewAPIClient(kratosCfg)
 
+	// Start the web server
 	api := &server.Server{
 		Address: cfg.ListenAddress,
 		Hydra:   hydraClient,
@@ -71,6 +73,8 @@ func main() {
 		}
 	}()
 
+	// Wait for a Ctrl-C signal
+	log.Info().Msg("The application has been started. To stop it press Ctrl-C.")
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, os.Interrupt)
 	<-shutdown

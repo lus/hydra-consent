@@ -8,6 +8,7 @@ import (
 	oryHydra "github.com/ory/hydra-client-go"
 	"github.com/rs/zerolog/log"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -37,6 +38,7 @@ func (cnt *controller) Endpoint(writer http.ResponseWriter, request *http.Reques
 		return
 	}
 
+	// Check if the client requesting consent is marked as trusted
 	accept := false
 	metadata := challenge.Client.Metadata
 	if metadata != nil {
@@ -46,6 +48,7 @@ func (cnt *controller) Endpoint(writer http.ResponseWriter, request *http.Reques
 		}
 	}
 
+	// Deny the consent challenge if the client is not trusted
 	if !accept {
 		log.Debug().
 			Str("challenge", challengeId).
@@ -69,13 +72,13 @@ func (cnt *controller) Endpoint(writer http.ResponseWriter, request *http.Reques
 		return
 	}
 
+	var session *oryHydra.AcceptOAuth2ConsentRequestSession
+
+	// Retrieve the identity of the subject directly from Kratos
 	subject := ""
 	if challenge.Subject != nil {
 		subject = *challenge.Subject
 	}
-
-	var session *oryHydra.AcceptOAuth2ConsentRequestSession
-
 	identity, response, err := cnt.Kratos.V0alpha2Api.AdminGetIdentity(request.Context(), subject).Execute()
 	if err != nil {
 		if response == nil || response.StatusCode != http.StatusNotFound {
@@ -83,17 +86,26 @@ func (cnt *controller) Endpoint(writer http.ResponseWriter, request *http.Reques
 			return
 		}
 	}
+
+	// Add the identity's traits to the session (ID & access tokens) according to the schema
 	if identity != nil {
-		parsedSession, err := kratos.ExtractSessionValues(request.Context(), cnt.Kratos, identity)
+		parsedSession, err := kratos.ExtractSessionValues(request.Context(), cnt.Kratos, challenge.RequestedScope, identity)
 		if err != nil {
 			cnt.error(writer, err)
 			return
 		}
 		session = parsedSession
+		if session != nil {
+			log.Debug().
+				Str("scopes", strings.Join(challenge.RequestedScope, ",")).
+				Interface("session", *session).
+				Msg("Injecting session data...")
+		}
 	} else {
 		log.Debug().Str("challenge", challengeId).Str("subject", subject).Msg("No Kratos identity was found.")
 	}
 
+	// Accept the consent challenge
 	log.Debug().Str("challenge", challengeId).Msg("Accepting a consent challenge...")
 	redirect, _, err := cnt.Hydra.OAuth2Api.AcceptOAuth2ConsentRequest(request.Context()).
 		ConsentChallenge(challengeId).
