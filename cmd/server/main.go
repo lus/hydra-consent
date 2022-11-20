@@ -1,10 +1,16 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"github.com/lus/hydra-consent/internal/config"
+	"github.com/lus/hydra-consent/internal/server"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"net/http"
 	"os"
+	"os/signal"
+	"time"
 )
 
 func main() {
@@ -26,4 +32,26 @@ func main() {
 		}
 		zerolog.SetGlobalLevel(logLevel)
 	}
+
+	api := &server.Server{
+		Address: cfg.ListenAddress,
+	}
+	log.Info().Str("address", cfg.ListenAddress).Msg("Starting the HTTP server...")
+	go func() {
+		if err := api.Run(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatal().Err(err).Msg("Could not start the HTTP server.")
+		}
+	}()
+	defer func() {
+		log.Info().Msg("Shutting down the HTTP server...")
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		if err := api.Stop(ctx); err != nil {
+			log.Err(err).Msg("Could not gracefully shut down the HTTP server.")
+		}
+	}()
+
+	shutdown := make(chan os.Signal, 1)
+	signal.Notify(shutdown, os.Interrupt)
+	<-shutdown
 }
