@@ -74,35 +74,37 @@ func (cnt *controller) Endpoint(writer http.ResponseWriter, request *http.Reques
 
 	var session *oryHydra.AcceptOAuth2ConsentRequestSession
 
-	// Retrieve the identity of the subject directly from Kratos
-	subject := ""
-	if challenge.Subject != nil {
-		subject = *challenge.Subject
-	}
-	identity, response, err := cnt.Kratos.V0alpha2Api.AdminGetIdentity(request.Context(), subject).Execute()
-	if err != nil {
-		if response == nil || response.StatusCode != http.StatusNotFound {
-			cnt.error(writer, err)
-			return
+	if cnt.Kratos != nil {
+		// Retrieve the identity of the subject directly from Kratos
+		subject := ""
+		if challenge.Subject != nil {
+			subject = *challenge.Subject
 		}
-	}
-
-	// Add the identity's traits to the session (ID & access tokens) according to the schema
-	if identity != nil {
-		parsedSession, err := kratos.ExtractSessionValues(request.Context(), cnt.Kratos, challenge.RequestedScope, identity)
+		identity, response, err := cnt.Kratos.V0alpha2Api.AdminGetIdentity(request.Context(), subject).Execute()
 		if err != nil {
-			cnt.error(writer, err)
-			return
+			if response == nil || response.StatusCode != http.StatusNotFound {
+				cnt.error(writer, err)
+				return
+			}
 		}
-		session = parsedSession
-		if session != nil {
-			log.Debug().
-				Str("scopes", strings.Join(challenge.RequestedScope, ",")).
-				Interface("session", *session).
-				Msg("Injecting session data...")
+
+		// Add the identity's traits to the session (ID & access tokens) according to the schema
+		if identity != nil {
+			parsedSession, err := kratos.ExtractSessionValues(request.Context(), cnt.Kratos, challenge.RequestedScope, identity)
+			if err != nil {
+				cnt.error(writer, err)
+				return
+			}
+			session = parsedSession
+			if session != nil {
+				log.Debug().
+					Str("scopes", strings.Join(challenge.RequestedScope, ",")).
+					Interface("session", *session).
+					Msg("Injecting session data...")
+			}
+		} else {
+			log.Debug().Str("challenge", challengeId).Str("subject", subject).Msg("No Kratos identity was found.")
 		}
-	} else {
-		log.Debug().Str("challenge", challengeId).Str("subject", subject).Msg("No Kratos identity was found.")
 	}
 
 	// Accept the consent challenge

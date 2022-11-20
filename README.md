@@ -1,4 +1,4 @@
-# hydra-consent &nbsp; [![](https://github.com/lus/hydra-consent/actions/workflows/docker.yml/badge.svg)](https://github.com/lus/hydra-consent/actions/workflows/docker.yml)
+# hydra-consent
 
 `hydra-consent` is a simple yet powerful consent flow handler for [Ory Hydra](https://github.com/ory/hydra).
 

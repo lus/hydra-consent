@@ -4,6 +4,7 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
+ENV CGO_ENABLED=0
 RUN go build -o service ./cmd/server/main.go
 
 # Run the binary on distroless

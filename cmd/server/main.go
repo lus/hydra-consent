@@ -44,13 +44,19 @@ func main() {
 	}
 	hydraClient := hydra.NewAPIClient(hydraCfg)
 
-	kratosCfg := kratos.NewConfiguration()
-	kratosCfg.Servers = []kratos.ServerConfiguration{
-		{
-			URL: cfg.KratosAdminAPI,
-		},
+	var kratosClient *kratos.APIClient
+	if cfg.IsKratosIntegrationEnabled() {
+		log.Info().Msg("Kratos integration is enabled.")
+		kratosCfg := kratos.NewConfiguration()
+		kratosCfg.Servers = []kratos.ServerConfiguration{
+			{
+				URL: cfg.KratosAdminAPI,
+			},
+		}
+		kratosClient = kratos.NewAPIClient(kratosCfg)
+	} else {
+		log.Info().Msg("Kratos integration is disabled.")
 	}
-	kratosClient := kratos.NewAPIClient(kratosCfg)
 
 	// Start the web server
 	api := &server.Server{

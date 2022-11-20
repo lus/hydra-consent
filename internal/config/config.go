@@ -11,11 +11,15 @@ type Config struct {
 	LogLevel       string `default:"info" split_words:"true"`
 	ListenAddress  string `default:":8080" split_words:"true"`
 	HydraAdminAPI  string `required:"true" split_words:"true"`
-	KratosAdminAPI string `required:"true" split_words:"true"`
+	KratosAdminAPI string `split_words:"true"`
 }
 
 func (cfg *Config) IsDevEnv() bool {
 	return strings.ToLower(cfg.Environment) == "dev"
+}
+
+func (cfg *Config) IsKratosIntegrationEnabled() bool {
+	return cfg.KratosAdminAPI != ""
 }
 
 func Load() (*Config, error) {
