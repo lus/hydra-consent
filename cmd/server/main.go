@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/lus/hydra-consent/internal/config"
 	"github.com/lus/hydra-consent/internal/server"
+	hydra "github.com/ory/hydra-client-go"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"net/http"
@@ -33,8 +34,17 @@ func main() {
 		zerolog.SetGlobalLevel(logLevel)
 	}
 
+	hydraCfg := hydra.NewConfiguration()
+	hydraCfg.Servers = []hydra.ServerConfiguration{
+		{
+			URL: cfg.HydraAdminAPI,
+		},
+	}
+	hydraClient := hydra.NewAPIClient(hydraCfg)
+
 	api := &server.Server{
 		Address: cfg.ListenAddress,
+		Hydra:   hydraClient,
 	}
 	log.Info().Str("address", cfg.ListenAddress).Msg("Starting the HTTP server...")
 	go func() {

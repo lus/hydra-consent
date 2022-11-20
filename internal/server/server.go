@@ -3,16 +3,25 @@ package server
 import (
 	"context"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	hydra "github.com/ory/hydra-client-go"
 	"net/http"
 )
 
 type Server struct {
 	httpServer *http.Server
 	Address    string
+	Hydra      *hydra.APIClient
 }
 
 func (server *Server) Run() error {
 	router := chi.NewRouter()
+	router.Use(middleware.Recoverer)
+
+	cnt := &controller{
+		Hydra: server.Hydra,
+	}
+	router.Get("/consent", cnt.Endpoint)
 
 	httpServer := &http.Server{
 		Addr:    server.Address,
