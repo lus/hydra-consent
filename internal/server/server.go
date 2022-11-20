@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	kratos "github.com/ory/client-go"
 	hydra "github.com/ory/hydra-client-go"
 	"net/http"
 )
@@ -12,6 +13,7 @@ type Server struct {
 	httpServer *http.Server
 	Address    string
 	Hydra      *hydra.APIClient
+	Kratos     *kratos.APIClient
 }
 
 func (server *Server) Run() error {
@@ -19,7 +21,8 @@ func (server *Server) Run() error {
 	router.Use(middleware.Recoverer)
 
 	cnt := &controller{
-		Hydra: server.Hydra,
+		Hydra:  server.Hydra,
+		Kratos: server.Kratos,
 	}
 	router.Get("/consent", cnt.Endpoint)
 

@@ -6,6 +6,7 @@ require (
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/joho/godotenv v1.4.0
 	github.com/kelseyhightower/envconfig v1.4.0
+	github.com/ory/client-go v0.2.0-alpha.60
 	github.com/ory/hydra-client-go v1.11.9-0.20221110172017-82dc84b5cf13
 	github.com/rs/zerolog v1.28.0
 )

@@ -117,6 +117,8 @@ github.com/mattn/go-colorable v0.1.13/go.mod h1:7S9/ev0klgBDR4GtXTXX8a3vIGJpMovk
 github.com/mattn/go-isatty v0.0.14/go.mod h1:7GGIvUiUoEMVVmxf/4nioHXj79iQHKdU27kJ6hsGG94=
 github.com/mattn/go-isatty v0.0.16 h1:bq3VjFmv/sOjHtdEhmkEV4x1AJtvUvOJ2PFAZ5+peKQ=
 github.com/mattn/go-isatty v0.0.16/go.mod h1:kYGgaQfpe5nmfYZH+SKPsOc2e4SrIfOl2e/yFXSvRLM=
+github.com/ory/client-go v0.2.0-alpha.60 h1:sMAqrKP5eUNYyyOYbSjDTwr8EucDxYLGrQC093ZX5pU=
+github.com/ory/client-go v0.2.0-alpha.60/go.mod h1:dWbi9DBEjiDXwyuJ1+A2WT1/bIp9HwvVxZxzHzp4YHU=
 github.com/ory/hydra-client-go v1.11.9-0.20221110172017-82dc84b5cf13 h1:+96jTQQhp1reaUkyUCZypmYMTVD1dz5ci6awiEmbU2U=
 github.com/ory/hydra-client-go v1.11.9-0.20221110172017-82dc84b5cf13/go.mod h1:4YuBuwUEC4yiyDrnKjGYc1tB3gUXan4ZiUYMjXJbfxA=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=

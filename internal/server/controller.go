@@ -1,16 +1,19 @@
 package server
 
 import (
+	"github.com/lus/hydra-consent/internal/kratos"
 	"github.com/lus/hydra-consent/internal/ptr"
 	"github.com/lus/hydra-consent/internal/static"
-	hydra "github.com/ory/hydra-client-go"
+	oryKratos "github.com/ory/client-go"
+	oryHydra "github.com/ory/hydra-client-go"
 	"github.com/rs/zerolog/log"
 	"net/http"
 	"time"
 )
 
 type controller struct {
-	Hydra *hydra.APIClient
+	Hydra  *oryHydra.APIClient
+	Kratos *oryKratos.APIClient
 }
 
 func (cnt *controller) Endpoint(writer http.ResponseWriter, request *http.Request) {
@@ -50,7 +53,7 @@ func (cnt *controller) Endpoint(writer http.ResponseWriter, request *http.Reques
 			Msg("Rejecting a consent challenge...")
 		redirect, _, err := cnt.Hydra.OAuth2Api.RejectOAuth2ConsentRequest(request.Context()).
 			ConsentChallenge(challengeId).
-			RejectOAuth2Request(hydra.RejectOAuth2Request{
+			RejectOAuth2Request(oryHydra.RejectOAuth2Request{
 				Error:            ptr.Ptr("access_denied"),
 				ErrorDebug:       ptr.Ptr("lus/hydra-consent"),
 				ErrorDescription: ptr.Ptr("The client requesting the consent is not trusted."),
@@ -66,14 +69,39 @@ func (cnt *controller) Endpoint(writer http.ResponseWriter, request *http.Reques
 		return
 	}
 
-	// TODO: Inject Kratos traits
+	subject := ""
+	if challenge.Subject != nil {
+		subject = *challenge.Subject
+	}
+
+	var session *oryHydra.AcceptOAuth2ConsentRequestSession
+
+	identity, response, err := cnt.Kratos.V0alpha2Api.AdminGetIdentity(request.Context(), subject).Execute()
+	if err != nil {
+		if response == nil || response.StatusCode != http.StatusNotFound {
+			cnt.error(writer, err)
+			return
+		}
+	}
+	if identity != nil {
+		parsedSession, err := kratos.ExtractSessionValues(request.Context(), cnt.Kratos, identity)
+		if err != nil {
+			cnt.error(writer, err)
+			return
+		}
+		session = parsedSession
+	} else {
+		log.Debug().Str("challenge", challengeId).Str("subject", subject).Msg("No Kratos identity was found.")
+	}
+
 	log.Debug().Str("challenge", challengeId).Msg("Accepting a consent challenge...")
 	redirect, _, err := cnt.Hydra.OAuth2Api.AcceptOAuth2ConsentRequest(request.Context()).
 		ConsentChallenge(challengeId).
-		AcceptOAuth2ConsentRequest(hydra.AcceptOAuth2ConsentRequest{
+		AcceptOAuth2ConsentRequest(oryHydra.AcceptOAuth2ConsentRequest{
 			GrantAccessTokenAudience: challenge.RequestedAccessTokenAudience,
 			GrantScope:               challenge.RequestedScope,
 			HandledAt:                ptr.Ptr(time.Now()),
+			Session:                  session,
 		}).
 		Execute()
 	if err != nil {

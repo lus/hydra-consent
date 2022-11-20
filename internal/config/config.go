@@ -7,10 +7,11 @@ import (
 )
 
 type Config struct {
-	Environment   string `default:"dev"`
-	LogLevel      string `default:"info" split_words:"true"`
-	ListenAddress string `default:":8080" split_words:"true"`
-	HydraAdminAPI string `required:"true" split_words:"true"`
+	Environment    string `default:"dev"`
+	LogLevel       string `default:"info" split_words:"true"`
+	ListenAddress  string `default:":8080" split_words:"true"`
+	HydraAdminAPI  string `required:"true" split_words:"true"`
+	KratosAdminAPI string `required:"true" split_words:"true"`
 }
 
 func (cfg *Config) IsDevEnv() bool {

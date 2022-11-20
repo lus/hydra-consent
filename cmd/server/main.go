@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/lus/hydra-consent/internal/config"
 	"github.com/lus/hydra-consent/internal/server"
+	kratos "github.com/ory/client-go"
 	hydra "github.com/ory/hydra-client-go"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -42,9 +43,18 @@ func main() {
 	}
 	hydraClient := hydra.NewAPIClient(hydraCfg)
 
+	kratosCfg := kratos.NewConfiguration()
+	kratosCfg.Servers = []kratos.ServerConfiguration{
+		{
+			URL: cfg.KratosAdminAPI,
+		},
+	}
+	kratosClient := kratos.NewAPIClient(kratosCfg)
+
 	api := &server.Server{
 		Address: cfg.ListenAddress,
 		Hydra:   hydraClient,
+		Kratos:  kratosClient,
 	}
 	log.Info().Str("address", cfg.ListenAddress).Msg("Starting the HTTP server...")
 	go func() {
