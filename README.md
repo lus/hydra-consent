@@ -3,7 +3,7 @@
 `hydra-consent` is a simple yet powerful consent flow handler for [Ory Hydra](https://github.com/ory/hydra).
 
 Additionally, it natively integrates with [Ory Kratos](https://github.com/ory/kratos) to dynamically propagate identity
-traits to ID & session tokens issued by Hydra. 
+traits to ID & access tokens issued by Hydra. 
 
 **Note:** This service works best in environments using both Hydra and Kratos and only creating Hydra clients for
 internal services, like an SSO-only environment, as it does not yet provide a user-facing UI for manually approving
@@ -112,14 +112,14 @@ Set the `trusted` metadata of every client whose consent challenges should be ac
 Congratulations! You successfully set up `hydra-consent`! Yes, it was that easy.
 
 However, if you use Ory Kratos as your identity provider, you may want to include some identity traits in the ID and/or
-session token(s). The following section will explain how this is possible.
+access token(s). The following section will explain how this is possible.
 
 ## Kratos identity trait propagation
 
 **Note:** In order for this to work, do not forget to set the `KRATOS_ADMIN_API` environment variable.
 
 `hydra-consent` natively integrates with Ory Kratos in order to be able to inject identity traits into the OAuth2 & OIDC
-ID & session tokens.
+ID & access tokens.
 It will search for values set in the `lus/hydra-consent` extension field for every trait defined in the
 **identity schema**.
 
@@ -152,7 +152,7 @@ Example schema making use of every feature supported by this service right now:
                         "required_scope": "profile",
                         "session_data": {
                             "id_token_key": "preferred_username"
-                            "session_token_key": "username"
+                            "access_token_key": "username"
                         }
                     }
                 },
@@ -196,7 +196,7 @@ Pay attention to the `lus/hydra-consent` schema extension fields.
 If the `required_scope` field is present and a string, the corresponding trait will only be propagated to clients
 granted this scope. If it is missing, it will be propagated to every client.
 
-The `session_data.id_token_key` and `session_data.session_token_key` fields specify the keys in the ID and session token
+The `session_data.id_token_key` and `session_data.access_token_key` fields specify the keys in the ID and access token
 under which the trait value will be set.
 These fields are also optional, not setting one of them simply will not include the trait in the corresponding token.
 
