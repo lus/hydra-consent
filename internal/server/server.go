@@ -30,6 +30,7 @@ func (server *Server) Run() error {
 		Addr:    server.Address,
 		Handler: router,
 	}
+	server.httpServer = httpServer
 	return httpServer.ListenAndServe()
 }
 

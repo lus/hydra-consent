@@ -151,7 +151,7 @@ Example schema making use of every feature supported by this service right now:
                     "lus/hydra-consent": {
                         "required_scope": "profile",
                         "session_data": {
-                            "id_token_key": "preferred_username"
+                            "id_token_key": "preferred_username",
                             "access_token_key": "username"
                         }
                     }
