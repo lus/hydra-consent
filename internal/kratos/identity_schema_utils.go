@@ -57,7 +57,7 @@ func ExtractSessionValues(ctx context.Context, client *oryKratos.APIClient, scop
 		// If the schema defines a key for the trait for the access token, add it to the session
 		accessTokenPath, ok := extractNestedValue[string](values, static.KratosIdentitySchemaExtensionKey+".session_data.access_token_key")
 		if ok {
-			idTokenValues[accessTokenPath] = traitValue
+			accessTokenValues[accessTokenPath] = traitValue
 		}
 	}
 
