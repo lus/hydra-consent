@@ -10,7 +10,7 @@ import (
 
 func ExtractSessionValues(ctx context.Context, client *oryKratos.APIClient, scopes []string, identity *oryKratos.Identity) (*oryHydra.AcceptOAuth2ConsentRequestSession, error) {
 	// Retrieve the raw schema data directly from Kratos
-	schema, _, err := client.V0alpha2Api.GetIdentitySchema(ctx, identity.SchemaId).Execute()
+	schema, _, err := client.IdentityAPI.GetIdentitySchema(ctx, identity.SchemaId).Execute()
 	if err != nil {
 		return nil, err
 	}

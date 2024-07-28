@@ -80,7 +80,7 @@ func (cnt *controller) Endpoint(writer http.ResponseWriter, request *http.Reques
 		if challenge.Subject != nil {
 			subject = *challenge.Subject
 		}
-		identity, response, err := cnt.Kratos.V0alpha2Api.AdminGetIdentity(request.Context(), subject).Execute()
+		identity, response, err := cnt.Kratos.IdentityAPI.GetIdentity(request.Context(), subject).Execute()
 		if err != nil {
 			if response == nil || response.StatusCode != http.StatusNotFound {
 				cnt.error(writer, err)
